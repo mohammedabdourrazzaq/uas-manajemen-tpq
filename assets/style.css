@@ -1,0 +1,57 @@
+body{
+    font-family: Arial, sans-serif;
+}
+
+.bg-login{
+    background: linear-gradient(
+        135deg,
+        #0d6efd,
+        #20c997
+    );
+
+    min-height: 100vh;
+
+    display: flex;
+    align-items: center;
+}
+
+.login-box{
+
+    width: 100%;
+    max-width: 420px;
+
+    margin: auto;
+
+    background: white;
+
+    padding: 40px;
+
+    border-radius: 20px;
+
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.card{
+    border: none;
+    border-radius: 18px;
+}
+
+.card-header{
+    border-radius: 18px 18px 0 0 !important;
+    font-weight: bold;
+}
+
+.statistik{
+    background: linear-gradient(
+        135deg,
+        #0d6efd,
+        #4f8cff
+    );
+
+    color: white;
+}
+
+.table td,
+.table th{
+    vertical-align: middle;
+}
