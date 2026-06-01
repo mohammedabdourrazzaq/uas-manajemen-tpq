@@ -1,47 +1,36 @@
 <?php
-
 require_once 'auth.php';
 require_once 'class.php';
-
 $app = new Setoran();
 
-
-// HAPUS
 if (isset($_GET['hapus'])) {
-
     if ($_SESSION['role'] == 'admin') {
-
         $app->hapus($_GET['hapus']);
     }
-
     header("Location: index.php");
     exit;
 }
 
-
-
-// SIMPAN
 if (isset($_POST['simpan'])) {
-
     if ($_POST['id'] == "") {
-
-        $app->tambah(
+       $app->tambah(
             $_POST['nama'],
             $_POST['surat'],
             $_POST['jenis'],
-            $_POST['ayat'],
+            $_POST['ayat_awal'],
+            $_POST['ayat_akhir'],
             $_POST['tanggal'],
             $_POST['nilai']
         );
     }
     else {
-
         $app->ubah(
             $_POST['id'],
             $_POST['nama'],
             $_POST['surat'],
             $_POST['jenis'],
-            $_POST['ayat'],
+            $_POST['ayat_awal'],
+            $_POST['ayat_akhir'],
             $_POST['tanggal'],
             $_POST['nilai']
         );
@@ -51,20 +40,15 @@ if (isset($_POST['simpan'])) {
     exit;
 }
 
-
-
-// DEFAULT
 $id_edit = "";
 $nama_edit = "";
 $surat_edit = "";
 $jenis_edit = "";
-$ayat_edit = "";
+$ayat_awal_edit = "";
+$ayat_akhir_edit = "";
 $tanggal_edit = date('Y-m-d');
 $nilai_edit = "";
 
-
-
-// EDIT
 if (isset($_GET['edit'])) {
 
     $edit = $app->ambilSatu($_GET['edit']);
@@ -73,16 +57,16 @@ if (isset($_GET['edit'])) {
     $nama_edit = $edit['nama_murid'];
     $surat_edit = $edit['nama_surat'];
     $jenis_edit = $edit['jenis_setoran'];
-    $ayat_edit = $edit['jumlah_ayat'];
+
+    $ayat_awal_edit = $edit['ayat_awal'];
+    $ayat_akhir_edit = $edit['ayat_akhir'];
+
     $tanggal_edit = $edit['tanggal_setoran'];
     $nilai_edit = $edit['nilai'];
 }
 
-
 $data = $app->tampilSemua();
-
 ?>
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -198,14 +182,9 @@ $data = $app->tampilSemua();
 
                             <label>Nama Surat</label>
 
-                            <input
-                                type="text"
-                                name="surat"
-                                class="form-control"
-                                value="<?= $surat_edit ?>"
-                                required
-                            >
-
+                            <select name="surat" id="surat" class="form-select" required>
+                        <option value="">Pilih Surat</option>
+                        </select>
                         </div>
 
                         <div class="mb-3">
@@ -229,44 +208,75 @@ $data = $app->tampilSemua();
 
                         </div>
 
-                        <div class="row">
+                       <div class="mb-3">
 
-                            <div class="col">
+    <label class="fw-bold">
+        Rentang Ayat
+    </label>
 
-                                <div class="mb-3">
+    <div class="row">
 
-                                    <label>Jumlah Ayat</label>
+        <div class="col-md-6">
 
-                                    <input
-                                        type="number"
-                                        name="ayat"
-                                        class="form-control"
-                                        value="<?= $ayat_edit ?>"
-                                        required
-                                    >
+            <label>Dari Ayat</label>
 
-                                </div>
+            <select
+                name="ayat_awal"
+                id="ayat_awal"
+                class="form-select"
+                required
+            >
+                <option value="">
+                    Pilih
+                </option>
+            </select>
 
-                            </div>
+        </div>
 
-                            <div class="col">
+        <div class="col-md-6">
 
-                                <div class="mb-3">
+            <label>Sampai Ayat</label>
 
-                                    <label>Nilai</label>
+            <select
+                name="ayat_akhir"
+                id="ayat_akhir"
+                class="form-select"
+                required
+            >
+                <option value="">
+                    Pilih
+                </option>
+            </select>
 
-                                    <input
-                                        type="number"
-                                        name="nilai"
-                                        class="form-control"
-                                        value="<?= $nilai_edit ?>"
-                                        required
-                                    >
+        </div>
 
-                                </div>
+    </div>
 
-                            </div>
+</div>
 
+<div class="mb-3">
+    <div class="mb-3">
+
+    <label>Jumlah Ayat</label>
+
+    <input
+        type="number"
+        id="jumlah_ayat"
+        class="form-control"
+        readonly
+    >
+
+</div>
+
+    <label>Nilai</label>
+
+    <input
+        type="number"
+        name="nilai"
+        class="form-control"
+        value="<?= $nilai_edit ?>"
+        required
+    >
                         </div>
 
                         <div class="mb-4">
@@ -322,7 +332,8 @@ $data = $app->tampilSemua();
 
                             <th>Tanggal</th>
                             <th>Nama</th>
-                            <th>Surat</th>
+                            <th>Surat & Ayat</th>
+                            <th>Jumlah Ayat</th>
                             <th>Jenis</th>
                             <th>Nilai</th>
                             <th>Aksi</th>
@@ -347,8 +358,12 @@ $data = $app->tampilSemua();
 
                                 <td>
                                     <?= $row['nama_surat']; ?>
+                                    (<?= $row['ayat_awal']; ?> - <?= $row['ayat_akhir']; ?>)
                                 </td>
-
+                                <td>
+                                    <?= $row['ayat_akhir'] - $row['ayat_awal'] + 1; ?>
+                                    ayat
+                                </td>
                                 <td>
                                     <?= $row['jenis_setoran']; ?>
                                 </td>
@@ -399,6 +414,201 @@ $data = $app->tampilSemua();
     </div>
 
 </div>
+<script>
+
+const daftarSurat = {
+    "Al-Fatihah": 7,
+    "Al-Baqarah": 286,
+    "Ali 'Imran": 200,
+    "An-Nisa": 176,
+    "Al-Ma'idah": 120,
+    "Al-An'am": 165,
+    "Al-A'raf": 206,
+    "Al-Anfal": 75,
+    "At-Taubah": 129,
+    "Yunus": 109,
+    "Hud": 123,
+    "Yusuf": 111,
+    "Ar-Ra'd": 43,
+    "Ibrahim": 52,
+    "Al-Hijr": 99,
+    "An-Nahl": 128,
+    "Al-Isra": 111,
+    "Al-Kahfi": 110,
+    "Maryam": 98,
+    "Ta-Ha": 135,
+    "Al-Anbiya": 112,
+    "Al-Hajj": 78,
+    "Al-Mu'minun": 118,
+    "An-Nur": 64,
+    "Al-Furqan": 77,
+    "Asy-Syu'ara": 227,
+    "An-Naml": 93,
+    "Al-Qashash": 88,
+    "Al-'Ankabut": 69,
+    "Ar-Rum": 60,
+    "Luqman": 34,
+    "As-Sajdah": 30,
+    "Al-Ahzab": 73,
+    "Saba": 54,
+    "Fatir": 45,
+    "Yasin": 83,
+    "Ash-Shaffat": 182,
+    "Shad": 88,
+    "Az-Zumar": 75,
+    "Ghafir": 85,
+    "Fushshilat": 54,
+    "Asy-Syura": 53,
+    "Az-Zukhruf": 89,
+    "Ad-Dukhan": 59,
+    "Al-Jatsiyah": 37,
+    "Al-Ahqaf": 35,
+    "Muhammad": 38,
+    "Al-Fath": 29,
+    "Al-Hujurat": 18,
+    "Qaf": 45,
+    "Az-Zariyat": 60,
+    "Ath-Thur": 49,
+    "An-Najm": 62,
+    "Al-Qamar": 55,
+    "Ar-Rahman": 78,
+    "Al-Waqi'ah": 96,
+    "Al-Hadid": 29,
+    "Al-Mujadilah": 22,
+    "Al-Hasyr": 24,
+    "Al-Mumtahanah": 13,
+    "Ash-Shaff": 14,
+    "Al-Jumu'ah": 11,
+    "Al-Munafiqun": 11,
+    "At-Taghabun": 18,
+    "Ath-Thalaq": 12,
+    "At-Tahrim": 12,
+    "Al-Mulk": 30,
+    "Al-Qalam": 52,
+    "Al-Haqqah": 52,
+    "Al-Ma'arij": 44,
+    "Nuh": 28,
+    "Al-Jin": 28,
+    "Al-Muzzammil": 20,
+    "Al-Muddatstsir": 56,
+    "Al-Qiyamah": 40,
+    "Al-Insan": 31,
+    "Al-Mursalat": 50,
+    "An-Naba": 40,
+    "An-Nazi'at": 46,
+    "'Abasa": 42,
+    "At-Takwir": 29,
+    "Al-Infithar": 19,
+    "Al-Muthaffifin": 36,
+    "Al-Insyiqaq": 25,
+    "Al-Buruj": 22,
+    "Ath-Thariq": 17,
+    "Al-A'la": 19,
+    "Al-Ghasyiyah": 26,
+    "Al-Fajr": 30,
+    "Al-Balad": 20,
+    "Asy-Syams": 15,
+    "Al-Lail": 21,
+    "Adh-Dhuha": 11,
+    "Asy-Syarh": 8,
+    "At-Tin": 8,
+    "Al-'Alaq": 19,
+    "Al-Qadr": 5,
+    "Al-Bayyinah": 8,
+    "Az-Zalzalah": 8,
+    "Al-'Adiyat": 11,
+    "Al-Qari'ah": 11,
+    "At-Takatsur": 8,
+    "Al-'Ashr": 3,
+    "Al-Humazah": 9,
+    "Al-Fil": 5,
+    "Quraisy": 4,
+    "Al-Ma'un": 7,
+    "Al-Kautsar": 3,
+    "Al-Kafirun": 6,
+    "An-Nashr": 3,
+    "Al-Lahab": 5,
+    "Al-Ikhlas": 4,
+    "Al-Falaq": 5,
+    "An-Nas": 6
+};
+
+const suratSelect = document.getElementById("surat");
+const ayatAwal =
+    document.getElementById("ayat_awal");
+
+const ayatAkhir =
+    document.getElementById("ayat_akhir");
+
+const jumlahAyat =
+    document.getElementById("jumlah_ayat");
+
+for (let namaSurat in daftarSurat) {
+
+    let option = document.createElement("option");
+
+    option.value = namaSurat;
+    option.textContent = namaSurat;
+
+    suratSelect.appendChild(option);
+}
+
+// Saat surat dipilih
+suratSelect.addEventListener(
+    "change",
+    function() {
+
+        let totalAyat =
+            daftarSurat[this.value];
+
+        ayatAwal.innerHTML = "";
+        ayatAkhir.innerHTML = "";
+
+        for(let i = 1; i <= totalAyat; i++)
+        {
+            ayatAwal.innerHTML +=
+                `<option value="${i}">
+                    ${i}
+                </option>`;
+
+            ayatAkhir.innerHTML +=
+                `<option value="${i}">
+                    ${i}
+                </option>`;
+        }
+});
+function hitungJumlahAyat()
+{
+    let awal = parseInt(ayatAwal.value);
+    let akhir = parseInt(ayatAkhir.value);
+
+    if (!isNaN(awal) && !isNaN(akhir))
+    {
+        if (akhir >= awal)
+        {
+            jumlahAyat.value =
+                akhir - awal + 1;
+        }
+        else
+        {
+            jumlahAyat.value = "";
+
+            alert(
+                "Ayat akhir tidak boleh lebih kecil dari ayat awal"
+            );
+        }
+    }
+}
+ayatAwal.addEventListener(
+    "change",
+    hitungJumlahAyat
+);
+
+ayatAkhir.addEventListener(
+    "change",
+    hitungJumlahAyat
+);
+</script>
 
 </body>
 </html>

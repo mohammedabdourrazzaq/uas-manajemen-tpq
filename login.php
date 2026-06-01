@@ -1,25 +1,18 @@
 <?php
 session_start();
-
 require_once 'class.php';
-
 $error = "";
 
 if (isset($_POST['login'])) {
-
     $user = new User();
-
     $user->setUsername($_POST['username']);
     $user->setPassword($_POST['password']);
-
     $data = $user->login();
 
     if ($data) {
-
         $_SESSION['login'] = true;
         $_SESSION['username'] = $data['username'];
         $_SESSION['role'] = $data['role'];
-
         header("Location: index.php");
         exit;
     }
@@ -27,7 +20,6 @@ if (isset($_POST['login'])) {
         $error = "Username atau Password salah!";
     }
 }
-
 ?>
 
 <!DOCTYPE html>
